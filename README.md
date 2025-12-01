@@ -7,8 +7,11 @@ The primary reason this project exists is so you can get a user's recent scores 
 
 It may also come in handy if you need to scrape scores for analytical purposes, although there are other, likely better, ways to acquire data for that (such as the dumps from [data.ppy.sh](https://data.ppy.sh)).
 
+## How do I use it?
+API docs coming soon...
+
 ## How does it work?
 The updater uses the osu! API's [Get Scores](https://osu.ppy.sh/docs/#get-scores102) endpoint to fetch global recent scores every few seconds for each game mode, then save them to a local database to be queried later by users of this API.
 
-## How do I use it?
-API docs coming soon...
+## How do I host it?
+Setup docs coming soon...
