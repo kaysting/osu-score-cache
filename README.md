@@ -15,7 +15,7 @@ oSC is accessible as a real-time WebSocket or a traditional JSON API.
 ### Real-time WebSocket
 The WebSocket is built using [Socket.io](https://socket.io/).
 
-An example of how to connect and listen for scores in JavaScript can be found here: [client.js](/examples/client.js).
+An example of how to connect and listen for scores in JavaScript can be found here: [examples/client.js](https://github.com/kaysting/osu-score-cache/blob/master/examples/client.js).
 
 ### JSON API
 
