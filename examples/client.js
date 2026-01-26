@@ -1,9 +1,9 @@
 const { io } = require('socket.io-client');
 
-const URL = 'http://localhost:8080';
+const BASE_URL = 'https://osc.kaysting.dev';
 
 // Initialize socket client
-const socket = io(URL, {
+const socket = io(BASE_URL, {
     path: '/ws',
     transports: ['websocket'] // avoid http polling
 });
