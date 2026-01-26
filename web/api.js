@@ -24,6 +24,7 @@ const modeMap = {
     mania: 'mania'
 };
 
+// Gemini helped write this :)
 router.get('/scores{/:mode}', (req, res) => {
     try {
         const mode = req.params.mode ? (modeMap[req.params.mode] || null) : null;
