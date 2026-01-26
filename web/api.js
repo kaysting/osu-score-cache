@@ -113,22 +113,25 @@ router.get('/scores{/:mode}', (req, res) => {
         const scores = rows.map(row => JSON.parse(utils.decompressData(row.raw)));
 
         // Reverse if we fetched ASC so API is always Newest->Oldest
-        if (sortOrder === "ASC") scores.reverse();
+        if (sortOrder === "ASC") {
+            scores.reverse();
+            rows.reverse();
+        }
 
         // Generate cursors
         let cursors = null;
         if (scores.length > 0) {
-            const first = scores[0]; // Newest
-            const last = scores[scores.length - 1]; // Oldest
+            const firstRow = rows[0]; // Newest
+            const lastRow = rows[rows.length - 1]; // Oldest
 
             cursors = {
                 newer: utils.getScoreCursor({
-                    time_submitted: new Date(first.ended_at).getTime(),
-                    id: first.id
+                    time_submitted: firstRow.time_submitted,
+                    id: firstRow.id
                 }),
                 older: utils.getScoreCursor({
-                    time_submitted: new Date(last.ended_at).getTime(),
-                    id: last.id
+                    time_submitted: lastRow.time_submitted,
+                    id: lastRow.id
                 })
             };
         }
