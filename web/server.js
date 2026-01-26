@@ -52,9 +52,8 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-    utils.log(`Server listening on port ${PORT}`);
+server.listen(env.PORT, () => {
+    utils.log(`Server listening on port ${env.PORT}`);
 });
 
 // Start the poller
