@@ -38,7 +38,7 @@ Returns recently submitted passing scores.
 
 **URL Parameters**
 
-* string? `mode`: Optionally specify an osu! game mode (ruleset) to limit scores to only that mode. Valid modes are `osu`, `taiko`, `fruits`, `catch`, and `mania`.
+* string? `mode`: Optionally specify an osu! game mode (ruleset) to limit scores to only that mode. Valid modes are `osu`, `taiko`, `fruits` (for ctb), and `mania`.
 
 **Query Parameters:**
 

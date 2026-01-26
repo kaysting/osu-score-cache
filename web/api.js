@@ -21,7 +21,6 @@ const modeMap = {
     osu: 'osu',
     taiko: 'taiko',
     fruits: 'fruits',
-    catch: 'fruits',
     mania: 'mania'
 };
 
