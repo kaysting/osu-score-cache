@@ -10,4 +10,6 @@ env.OSU_CLIENT_SECRET = process.env.OSU_CLIENT_SECRET || '';
 
 env.DB_PATH = process.env.DB_PATH || path.join(env.ROOT, 'database/storage.db');
 
+env.SCORE_CACHE_DAYS = parseInt(process.env.SCORE_CACHE_DAYS) || 30;
+
 module.exports = env;

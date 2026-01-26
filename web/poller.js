@@ -1,3 +1,4 @@
+const env = require('#env');
 const db = require('#db');
 const utils = require('#utils');
 const osu = require('#lib/osu');
@@ -8,6 +9,8 @@ const rulesetIntsToStrings = {
     2: 'fruits',
     3: 'mania',
 };
+
+let lastCleanup = 0;
 
 module.exports = io => {
 
@@ -41,10 +44,13 @@ module.exports = io => {
             // Only broadcast/save if we got new scores
             if (scores.length > 0) {
 
+                // Sort scores by time ascending
+                scores.sort((a, b) => new Date(a.ended_at) - new Date(b.ended_at));
+
                 // Broadcast all scores to global scores room
                 io.to('scores').emit('scores', scores);
 
-                // Save scores to db
+                // Save scores to db, including the raw score JSON compressed
                 const insertScore = db.prepare(`INSERT INTO scores (id, mode, time_submitted, raw) VALUES (?, ?, ?, ?)`);
                 db.transaction(() => {
                     for (const score of scores) {
@@ -68,6 +74,27 @@ module.exports = io => {
                     insertCursor.run(mode, newCursors[mode]);
                 }
             })();
+
+            // Run cleanup process if it's been long enough
+            const now = Date.now();
+            const ONE_HOUR = 60 * 60 * 1000;
+            if (now - lastCleanup > ONE_HOUR) {
+
+                // Calculate cutoff date
+                const days = parseInt(env.SCORE_CACHE_DAYS);
+                const cutoffDate = now - (days * 24 * 60 * 60 * 1000);
+
+                // Delete scores older than the cutoff
+                utils.log(`Checking for scores older than ${days} days...`);
+                const deleteOld = db.prepare('DELETE FROM scores WHERE time_submitted < ?');
+                const info = deleteOld.run(cutoffDate);
+
+                utils.log(`Pruned ${info.changes} old scores`);
+
+                // Reset the timer
+                lastCleanup = now;
+
+            }
 
         } catch (error) {
             utils.logError('Error during polling:', error);
