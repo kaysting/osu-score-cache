@@ -109,9 +109,10 @@ module.exports = io => {
         }
 
         // Wait and poll again
-        // Poll usually takes ~500ms, so we wait 3.5s to get it down to 60 requests/min
-        // This abides by osu's soft rate limit
-        setTimeout(poll, 3500);
+        const minTime = 5000;
+        const elapsed = Date.now() - START_TIME;
+        const timeLeft = Math.max(0, minTime - elapsed);
+        setTimeout(poll, timeLeft);
 
     };
 
