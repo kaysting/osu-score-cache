@@ -15,6 +15,7 @@ let lastCleanup = 0;
 module.exports = io => {
 
     const poll = async () => {
+        const START_TIME = Date.now();
         try {
 
             const newCursors = {};
@@ -63,9 +64,10 @@ module.exports = io => {
                         );
                     }
                 })();
-                utils.log(`Saved ${scores.length} new scores`);
 
             }
+
+            utils.log(`Saved and broadcasted ${scores.length} new scores in ${Date.now() - START_TIME}ms`);
 
             // Save cursors
             const insertCursor = db.prepare(`INSERT OR REPLACE INTO cursors (mode, cursor) VALUES (?, ?)`);
