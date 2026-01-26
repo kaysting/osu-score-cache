@@ -1,1 +1,0 @@
-sqlite3 scores.db .schema > schema.sql

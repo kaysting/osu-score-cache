@@ -1,17 +1,15 @@
 [GitHub](https://github.com/kaysting/osu-score-cache)  •  [Website](https://osuscorecache.kaysting.dev/)
+
 # osu! score cache
-A JSON API that provides access to all recent map passes submitted to the osu! servers, across all game modes and map statuses. Results can be filtered by user and score submission time.
+A JSON API and realtime WebSocket that provides access to recent map passes submitted to the osu! servers, across all game modes and map statuses. oSC caches several days of scores, so you're able to move backwards and forwards in time using the API.
 
 ## Why should I use this over the osu! API?
-The primary reason this project exists is so you can get a user's recent scores from before just the past 24 hours, since that appears to be the limitation of osu's [Get User Scores](https://osu.ppy.sh/docs/#get-user-scores) endpoint (with type `recent`).
-
-It may also come in handy if you need to scrape scores for analytical purposes, although there are other, likely better, ways to acquire data for that (such as the dumps from [data.ppy.sh](https://data.ppy.sh)).
+The primary appeal of this project is for applications where you need a real-time feed of new passing scores submitted to osu!, or if you need to use osu!'s [Get Scores](https://osu.ppy.sh/docs/#get-scores102) API endpoint with the ability to move backwards in history.
 
 ## How do I use it?
-API docs coming soon...
+An example of how to connect to and listen for scores on the WebSocket can be found [here](/examples/client.js).
 
-## How does it work?
-The updater uses the osu! API's [Get Scores](https://osu.ppy.sh/docs/#get-scores102) endpoint to fetch global recent scores every few seconds for each game mode, then save them to a local database to be queried later by users of this API.
+JSON API docs are coming soon...
 
 ## How do I host it?
 Setup docs coming soon...
