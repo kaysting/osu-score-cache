@@ -41,6 +41,10 @@ app.get('/', (req, res) => {
     });
 });
 
+app.use((req, res, next) => {
+    res.status(404).end();
+});
+
 // Set up socket.io
 io.on('connection', (socket) => {
     socket.on('subscribe', (room) => {
