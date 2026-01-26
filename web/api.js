@@ -145,8 +145,12 @@ router.get('/scores{/:mode}', (req, res) => {
 
     } catch (err) {
         utils.logError('Error handling API request', err);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Internal server error." });
     }
+});
+
+router.use((req, res) => {
+    res.status(404).json({ success: false, message: "Invalid endpoint." });
 });
 
 module.exports = router;
