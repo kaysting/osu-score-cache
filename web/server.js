@@ -23,6 +23,9 @@ const io = new socketIo.Server(server, {
 app.set('view engine', 'ejs');
 app.set('views', path.join(env.ROOT, 'web', 'views'));
 
+// Trust proxy if behind one
+app.set('trust proxy', true);
+
 // Expose API
 app.use('/api', require('./api'));
 
