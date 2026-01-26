@@ -18,12 +18,14 @@ The WebSocket is built using [Socket.io](https://socket.io/).
 #### Rooms
 
 **scores** or **scores_{mode}**
+
 Emits a `scores` event with an array of the most recent [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API in all modes.
 
 If a `scores_{mode}` room is used, it returns the same as above, but returns only scores set in that specific `{mode}`.  
 Mode must be one of `osu`, `taiko`, `fruits` (for ctb), or `mania`.
 
 **updates**
+
 Emits an `update` event with the following object:
 
 * integer `count`: The number of new scores saved
