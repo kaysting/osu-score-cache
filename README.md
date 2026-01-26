@@ -15,7 +15,58 @@ oSC is accessible as a real-time WebSocket or a traditional JSON API.
 ### Real-time WebSocket
 The WebSocket is built using [Socket.io](https://socket.io/).
 
-An example of how to connect and listen for scores in JavaScript can be found here: [examples/client.js](https://github.com/kaysting/osu-score-cache/blob/master/examples/client.js).
+#### Rooms
+
+**scores** or **scores_{mode}**
+Emits a `scores` event with an array of the most recent [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API in all modes.
+
+If a `scores_{mode}` room is used, it returns the same as above, but returns only scores set in that specific `{mode}`.  
+Mode must be one of `osu`, `taiko`, `fruits` (for ctb), or `mania`.
+
+**updates**
+Emits an `update` event with the following object:
+
+* integer `count`: The number of new scores saved
+* integer `timestamp`: The current millisecond-based Unix timestamp
+
+The expectation is that you use this event as a signal to fetch the data you need from the API, or perform some other action.
+
+#### Set up in JavaScript (Node.js)
+
+Install and require the module:
+
+```js
+const { io } = require('socket.io-client');
+```
+
+Initialize the connection:
+
+```js
+const socket = io('https://osc.kaysting.dev', {
+    path: '/ws',              // socket is under /ws
+    transports: ['websocket'] // avoid http polling
+});
+```
+
+Connect and subscribe to rooms:
+
+```js
+socket.on('connect', () => {
+
+    console.log(`Connected to osu! score cache!`);
+
+    socket.emit('subscribe', 'scores'); // here we subscribe to the "scores" room
+
+});
+```
+
+Listen for events:
+
+```js
+socket.on('scores', scores => {
+    // Do something with the scores
+});
+```
 
 ### JSON API
 
@@ -54,9 +105,9 @@ Returns recently submitted passing scores.
   * object? `cursors`: Cursor strings for pagination, or `null` if no scores were found.
     * string `older`: A cursor string to be used with the `before` query parameter.
     * string `newer`: A cursor string to be used with the `after` query parameter.
-* array `scores`: A list of [Score](https://osu.ppy.sh/docs/#score) objects.from the osu! API.
+* array `scores`: A list of [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API.
 
 ### Rate Limits
-The JSON API is limited to 60 requests per minute and will return HTTP status `429` with an error object.
+The JSON API is limited to 60 requests per minute and will return HTTP status `429` with an error object if exceeded.
 
 The WebSocket currently has no rate limit but one may be added if we run into performance issues.

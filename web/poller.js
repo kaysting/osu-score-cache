@@ -65,6 +65,12 @@ module.exports = io => {
                     }
                 })();
 
+                // Broadcast update notification
+                io.to('updates').emit('update', {
+                    count: scores.length,
+                    timestamp: Date.now()
+                });
+
             }
 
             utils.log(`Saved and broadcasted ${scores.length} new scores in ${Date.now() - START_TIME}ms`);

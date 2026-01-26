@@ -14,8 +14,9 @@ socket.on('connect', () => {
     console.log(`Connected to osu! score cache!`);
 
     // Subscribe to start receiving scores
-    // Valid rooms: scores, scores_osu, scores_taiko, scores_fruits, scores_mania
+    // Valid rooms: scores, scores_osu, scores_taiko, scores_fruits, scores_mania, updates
     // The scores room broadcasts all scores
+    // The updates room broadcasts a notification when new scores are available
     socket.emit('subscribe', 'scores');
 
 });
