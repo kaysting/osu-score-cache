@@ -1,4 +1,4 @@
-[GitHub](https://github.com/kaysting/osu-score-cache)  •  [Website](https://osuscorecache.kaysting.dev/)
+[GitHub](https://github.com/kaysting/osu-score-cache)  •  [Website](https://osc.kaysting.dev/)
 
 # osu! score cache
 A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers across all game modes and map statuses. oSC also caches several days of scores, so you're able to move backwards and forwards in time using the API.
