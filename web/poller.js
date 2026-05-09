@@ -42,11 +42,6 @@ module.exports = io => {
                 // Save scores to array and make note of cursor to save later
                 scores.push(...modeScores);
                 newCursors[mode] = res.cursor_string;
-
-                // Broadcast mode specific scores
-                if (modeScores.length > 0) {
-                    io.to(`scores_${mode}`).emit('scores', modeScores);
-                }
             }
 
             // Only broadcast/save if we got new scores
@@ -67,14 +62,22 @@ module.exports = io => {
                 // Save scores to db, including the raw score JSON compressed
                 let now = Date.now();
                 const insertScore = db.prepare(
-                    `INSERT OR REPLACE INTO scores (id, mode, time_saved, raw)
-                    VALUES (?, ?, ?, ?)`
+                    `INSERT OR REPLACE INTO scores (
+                        id, mode, time_saved, raw, user_id, map_id
+                    )VALUES (?, ?, ?, ?, ?, ?)`
                 );
                 db.transaction(() => {
                     for (const score of scores) {
                         // britli-compress the JSON data to save on storage
                         const raw = utils.compressData(JSON.stringify(score));
-                        insertScore.run(score.id, rulesetIntsToStrings[score.ruleset_id], now, raw);
+                        insertScore.run(
+                            score.id,
+                            rulesetIntsToStrings[score.ruleset_id],
+                            now,
+                            raw,
+                            score.user_id,
+                            score.beatmap_id
+                        );
                         // Increment current timestamp to ensure unique save times
                         now++;
                     }

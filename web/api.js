@@ -30,13 +30,44 @@ const modeMap = {
     mania: 'mania'
 };
 
-router.get('/scores{/:mode}', (req, res) => {
+router.get('/scores', (req, res) => {
     try {
+        // Define constants
+        const MAX_LIST_LENGTH = 32;
+        const MAX_SCORE_COUNT = 1000;
+
         // Get params
-        const mode = req.params.mode ? modeMap[req.params.mode?.toLowerCase()] || null : null;
-        const limit = utils.clamp(parseInt(req.query.limit) || 100, 1, 1000);
-        const before = parseInt(req.query.before) ?? null;
-        const after = parseInt(req.query.after) ?? null;
+        // Note: We use OR (||) instead of nullish (??) for numbers
+        // because NaN isn't null or undefined
+        const mode = modeMap[(req.query.mode || '').toLowerCase()] || null;
+        const limit = utils.clamp(parseInt(req.query.limit) || 100, 1, MAX_SCORE_COUNT);
+        const before = parseInt(req.query.before) || null;
+        const after = parseInt(req.query.after) || null;
+        const userIds = (req.query.user ?? '')
+            .split(',')
+            .map(id => parseInt(id))
+            .filter(Boolean);
+        const mapIds = (req.query.map ?? '')
+            .split(',')
+            .map(id => parseInt(id))
+            .filter(Boolean);
+
+        // Validate params
+        const lists = [
+            { name: 'user', list: userIds },
+            {
+                name: 'map',
+                list: mapIds
+            }
+        ];
+        for (const entry of lists) {
+            if (entry.list.length > MAX_LIST_LENGTH) {
+                return res.status(400).json({
+                    success: false,
+                    message: `List ${entry.name} may contain up to 32 entries, but ${entry.list.length} where provided.`
+                });
+            }
+        }
 
         const whereClauses = [];
         const params = [];
@@ -48,6 +79,24 @@ router.get('/scores{/:mode}', (req, res) => {
         // Think of this as the direction in time we want to read
         const sortOrder = after ? 'ASC' : 'DESC';
 
+        // Handle mode filtering
+        if (mode) {
+            whereClauses.push(`mode = ?`);
+            params.push(mode);
+        }
+
+        // Handle user filtering
+        if (userIds.length) {
+            whereClauses.push(`user_id IN (${userIds.map(id => '?').join(', ')})`);
+            params.push(...userIds);
+        }
+
+        // Handle map filtering
+        if (mapIds.length) {
+            whereClauses.push(`map_id IN (${mapIds.map(id => '?').join(', ')})`);
+            params.push(...mapIds);
+        }
+
         // Handle before/after conditions
         // They can be used together but probably shouldn't
         if (before) {
@@ -57,12 +106,6 @@ router.get('/scores{/:mode}', (req, res) => {
         if (after) {
             whereClauses.push(`time_saved > ?`);
             params.push(after);
-        }
-
-        // Handle mode condition
-        if (mode) {
-            whereClauses.push(`mode = ?`);
-            params.push(mode);
         }
 
         // Push limit as a param for consistency
@@ -94,7 +137,9 @@ router.get('/scores{/:mode}', (req, res) => {
                 oldest: null,
                 newest: null,
                 count: 0,
-                mode: mode ?? 'all'
+                mode: mode ?? 'all',
+                users: [],
+                maps: []
             },
             scores: []
         };
@@ -105,6 +150,16 @@ router.get('/scores{/:mode}', (req, res) => {
             data.meta.count = scores.length;
             data.meta.oldest = scoresRaw[0].time_saved;
             data.meta.newest = scoresRaw[scoresRaw.length - 1].time_saved;
+            for (const score of scores) {
+                const mapId = score.beatmap_id;
+                const userId = score.user_id;
+                if (!data.meta.users.includes(userId)) {
+                    data.meta.users.push(userId);
+                }
+                if (!data.meta.maps.includes(mapId)) {
+                    data.meta.maps.push(mapId);
+                }
+            }
         }
 
         // Respond
