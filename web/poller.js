@@ -7,63 +7,83 @@ const rulesetIntsToStrings = {
     0: 'osu',
     1: 'taiko',
     2: 'fruits',
-    3: 'mania',
+    3: 'mania'
 };
+
+const getTotalStored = () => db.prepare(`SELECT COUNT(*) AS count FROM scores`).get().count;
 
 let lastCleanup = 0;
 
 module.exports = io => {
-
     const poll = async () => {
         const START_TIME = Date.now();
         try {
-
             const newCursors = {};
             const scores = [];
 
             // Loop through modes and fetch recent scores for each
             for (const mode of Object.values(rulesetIntsToStrings)) {
-
                 // Get cursor from db or make it undefined to fetch the latest 1000 scores
                 const cursor = db.prepare(`SELECT cursor FROM cursors WHERE mode = ?`).get(mode)?.cursor || undefined;
+
+                // Fetch the scores
                 const res = await osu.getScores({
                     ruleset: mode,
                     cursor_string: cursor
                 });
 
+                // Sort scores oldest to newest
+                // This seems redundant with the code further down but I wanna
+                // make sure scores are broadcasted in a consistent order
+                const modeScores = res.scores.sort((a, b) => {
+                    return new Date(a.ended_at).getTime() - new Date(b.ended_at).getTime();
+                });
+
                 // Save scores to array and make note of cursor to save later
-                scores.push(...res.scores);
+                scores.push(...modeScores);
                 newCursors[mode] = res.cursor_string;
 
                 // Broadcast mode specific scores
-                if (res.scores.length > 0) {
-                    io.to(`scores_${mode}`).emit('scores', res.scores);
+                if (modeScores.length > 0) {
+                    io.to(`scores_${mode}`).emit('scores', modeScores);
                 }
-
             }
 
             // Only broadcast/save if we got new scores
             if (scores.length > 0) {
-
                 // Sort scores by time ascending
-                scores.sort((a, b) => new Date(a.ended_at) - new Date(b.ended_at));
+                // This also undoes the unintentional mode sort made before
+                // by pushing scores to this array by mode
+                scores.sort((a, b) => {
+                    return new Date(a.ended_at).getTime() - new Date(b.ended_at).getTime();
+                });
 
                 // Broadcast all scores to global scores room
                 io.to('scores').emit('scores', scores);
 
+                // Get the number of scores in the db before saving this batch
+                const countBeforeSaving = getTotalStored();
+
                 // Save scores to db, including the raw score JSON compressed
-                const insertScore = db.prepare(`INSERT OR REPLACE INTO scores (id, mode, time_submitted, raw) VALUES (?, ?, ?, ?)`);
+                let now = Date.now();
+                const insertScore = db.prepare(
+                    `INSERT OR REPLACE INTO scores (id, mode, time_saved, raw)
+                    VALUES (?, ?, ?, ?)`
+                );
                 db.transaction(() => {
                     for (const score of scores) {
+                        // britli-compress the JSON data to save on storage
                         const raw = utils.compressData(JSON.stringify(score));
-                        insertScore.run(
-                            score.id,
-                            rulesetIntsToStrings[score.ruleset_id],
-                            new Date(score.ended_at).getTime(),
-                            raw
-                        );
+                        insertScore.run(score.id, rulesetIntsToStrings[score.ruleset_id], now, raw);
+                        // Increment current timestamp to ensure unique save times
+                        now++;
                     }
                 })();
+
+                // Get the updated stored number of scores and use it to concretely
+                // say how many scores we saved
+                const countAfterSaving = getTotalStored();
+                const actualCountSaved = countAfterSaving - countBeforeSaving;
 
                 // Broadcast update notification
                 io.to('updates').emit('update', {
@@ -71,9 +91,13 @@ module.exports = io => {
                     timestamp: Date.now()
                 });
 
+                utils.log(
+                    `Fetched and broadcasted ${scores.length} and saved ${actualCountSaved} scores in ${Date.now() - START_TIME}ms`
+                );
+            } else {
+                // osu is very active, this should almost never trigger
+                utils.log(`Polled for new scores but receined none`);
             }
-
-            utils.log(`Saved and broadcasted ${scores.length} new scores in ${Date.now() - START_TIME}ms`);
 
             // Save cursors
             const insertCursor = db.prepare(`INSERT OR REPLACE INTO cursors (mode, cursor) VALUES (?, ?)`);
@@ -87,23 +111,18 @@ module.exports = io => {
             const now = Date.now();
             const ONE_HOUR = 60 * 60 * 1000;
             if (now - lastCleanup > ONE_HOUR) {
-
                 // Calculate cutoff date
                 const days = parseInt(env.SCORE_CACHE_DAYS);
-                const cutoffDate = now - (days * 24 * 60 * 60 * 1000);
+                const cutoffDate = now - days * 24 * 60 * 60 * 1000;
 
                 // Delete scores older than the cutoff
                 utils.log(`Checking for scores older than ${days} days...`);
-                const deleteOld = db.prepare('DELETE FROM scores WHERE time_submitted < ?');
-                const info = deleteOld.run(cutoffDate);
-
-                utils.log(`Pruned ${info.changes} old scores`);
+                const res = db.prepare('DELETE FROM scores WHERE time_saved < ?').run(cutoffDate);
+                if (res.changes) utils.log(`Pruned ${res.changes} old scores`);
 
                 // Reset the timer
                 lastCleanup = now;
-
             }
-
         } catch (error) {
             utils.logError('Error during polling:', error);
         }
@@ -113,9 +132,7 @@ module.exports = io => {
         const elapsed = Date.now() - START_TIME;
         const timeLeft = Math.max(0, minTime - elapsed);
         setTimeout(poll, timeLeft);
-
     };
 
     poll();
-
 };

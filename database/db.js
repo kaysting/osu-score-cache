@@ -1,7 +1,7 @@
 const fs = require('fs');
 const env = require('#env');
 const Database = require('better-sqlite3');
-const utils = require('#utils');
+const utils = require('../lib/utils');
 const path = require('path');
 
 // Open database

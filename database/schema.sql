@@ -3,16 +3,15 @@ CREATE TABLE
 
 CREATE TABLE
 	IF NOT EXISTS "scores" (
-		"id" INTEGER NOT NULL,
-		"mode" INTEGER NOT NULL,
-		"time_submitted" INTEGER NOT NULL,
-		"raw" BLOB NOT NULL,
-		PRIMARY KEY ("id")
+		"id" INTEGER PRIMARY KEY,
+		"time_saved" INTEGER NOT NULL,
+		"mode" TEXT NOT NULL,
+		"raw" BLOB NOT NULL
 	);
 
-CREATE INDEX IF NOT EXISTS "idx_scores_timeline" ON "scores" ("time_submitted" DESC, "id" DESC);
+CREATE INDEX IF NOT EXISTS "idx_scores_time" ON "scores" ("time_saved");
 
-CREATE INDEX IF NOT EXISTS "idx_scores_mode_timeline" ON "scores" ("mode", "time_submitted" DESC, "id" DESC);
+CREATE INDEX IF NOT EXISTS "idx_scores_mode_time" ON "scores" ("mode", "time_saved");
 
 CREATE TABLE
 	IF NOT EXISTS "misc" ("key" TEXT NOT NULL, "value" TEXT NOT NULL, PRIMARY KEY ("key"));

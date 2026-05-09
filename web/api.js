@@ -1,159 +1,122 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const db = require('#db');
-const utils = require('#utils');
+const env = require('#env');
+const utils = require('#lib/utils');
 
 const router = express.Router();
 
-router.use(rateLimit({
-    windowMs: 1000 * 60,
-    limit: 60,
-    ipv6Subnet: 60,
-    handler: (req, res) => {
-        res.status(429).json({
-            success: false,
-            message: 'Rate limit reached. Please wait and try again.'
-        });
-    }
-}));
+router.use(
+    rateLimit({
+        windowMs: 1000 * 60,
+        limit: 60,
+        ipv6Subnet: 60,
+        handler: (req, res) => {
+            res.status(429).json({
+                success: false,
+                message: `Rate limit exceeded. Please wait and try again. If you're polling for new scores, please use the websocket. Find documentation at https://osc.kaysting.dev.`
+            });
+        }
+    })
+);
 
 const modeMap = {
     osu: 'osu',
+    std: 'osu',
     taiko: 'taiko',
     fruits: 'fruits',
+    catch: 'fruits',
+    ctb: 'fruits',
     mania: 'mania'
 };
 
-// Gemini helped write this :)
 router.get('/scores{/:mode}', (req, res) => {
     try {
-        const mode = req.params.mode ? (modeMap[req.params.mode] || null) : null;
+        // Get params
+        const mode = req.params.mode ? modeMap[req.params.mode?.toLowerCase()] || null : null;
         const limit = utils.clamp(parseInt(req.query.limit) || 100, 1, 1000);
+        const before = parseInt(req.query.before) ?? null;
+        const after = parseInt(req.query.after) ?? null;
 
-        // Helper to parse base64 cursor or fallback to raw timestamp
-        const parseParam = (param) => {
-            if (!param) return null;
-            // Try parsing base64 cursor
-            const cursor = utils.parseScoreCursor(param);
-            if (cursor) return cursor;
-
-            // Fallback to treating as timestamp
-            const timestamp = parseInt(param);
-            if (!isNaN(timestamp)) {
-                return { time: timestamp, id: null }; // No ID means "Loose" query
-            }
-            return null;
-        };
-
-        const beforeCursor = parseParam(req.query.before);
-        const afterCursor = parseParam(req.query.after);
-
-        // Validation
-        if (req.query.before && req.query.after) {
-            return res.status(400).json({ success: false, message: "Can't use 'before' and 'after' simultaneously." });
-        }
-
-        // If they provided text but we couldn't parse it as either Base64 or Number
-        if ((req.query.before && !beforeCursor) || (req.query.after && !afterCursor)) {
-            return res.status(400).json({ success: false, message: "Invalid cursor or timestamp." });
-        }
-
-        // Build SQL
-        let queryStr = "SELECT raw, time_submitted, id FROM scores";
+        const whereClauses = [];
         const params = [];
-        const conditions = [];
 
+        // Set query sort order explicitly
+        // When after is passed, we want to start from the oldest scores
+        // and work forward, but if no pagination or before is passed,
+        // we want to start from the newest scores and work backwards
+        // Think of this as the direction in time we want to read
+        const sortOrder = after ? 'ASC' : 'DESC';
+
+        // Handle before/after conditions
+        // They can be used together but probably shouldn't
+        if (before) {
+            whereClauses.push(`time_saved < ?`);
+            params.push(before);
+        }
+        if (after) {
+            whereClauses.push(`time_saved > ?`);
+            params.push(after);
+        }
+
+        // Handle mode condition
         if (mode) {
-            conditions.push("mode = ?");
+            whereClauses.push(`mode = ?`);
             params.push(mode);
         }
 
-        let sortOrder = "DESC";
-
-        // SCROLL FORWARD (Catch Up)
-        if (afterCursor) {
-            sortOrder = "ASC";
-
-            if (afterCursor.id !== null) {
-                // Precise (Cursor): Time is newer OR (Time is same AND ID is larger)
-                conditions.push("((time_submitted > ?) OR (time_submitted = ? AND id > ?))");
-                params.push(afterCursor.time, afterCursor.time, afterCursor.id);
-            } else {
-                // Loose (Timestamp Jump): Just newer than time
-                conditions.push("time_submitted > ?");
-                params.push(afterCursor.time);
-            }
-        }
-        // SCROLL BACKWARD (Standard Feed)
-        else {
-            if (beforeCursor) {
-                if (beforeCursor.id !== null) {
-                    // Precise (Cursor): Time is older OR (Time is same AND ID is smaller)
-                    conditions.push("((time_submitted < ?) OR (time_submitted = ? AND id < ?))");
-                    params.push(beforeCursor.time, beforeCursor.time, beforeCursor.id);
-                } else {
-                    // Loose (Timestamp Jump): Just older than time
-                    conditions.push("time_submitted < ?");
-                    params.push(beforeCursor.time);
-                }
-            }
-        }
-
-        if (conditions.length > 0) {
-            queryStr += " WHERE " + conditions.join(" AND ");
-        }
-
-        queryStr += ` ORDER BY time_submitted ${sortOrder}, id ${sortOrder} LIMIT ?`;
+        // Push limit as a param for consistency
         params.push(limit);
 
-        // Execute query
-        const rows = db.prepare(queryStr).all(...params);
+        // Build SQL and get scores from db
+        const sql = `
+            SELECT * FROM scores
+            ${whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''}
+            ORDER BY time_saved ${sortOrder}
+            LIMIT ?
+        `;
+        const scoresRaw = db.prepare(sql).all(...params);
 
-        // Decompress
-        const scores = rows.map(row => JSON.parse(utils.decompressData(row.raw)));
+        // Ensure initial scores array is sorted oldest to newest
+        if (sortOrder == 'DESC') scoresRaw.reverse();
 
-        // Reverse if we fetched ASC so API is always Newest->Oldest
-        if (sortOrder === "ASC") {
-            scores.reverse();
-            rows.reverse();
+        // Build final scores array by pushing only the raw data
+        const scores = [];
+        for (const score of scoresRaw) {
+            scores.push(JSON.parse(utils.decompressData(score.raw)));
         }
 
-        // Generate cursors
-        let cursors = null;
-        if (scores.length > 0) {
-            const firstRow = rows[0]; // Newest
-            const lastRow = rows[rows.length - 1]; // Oldest
+        // Build default data object
+        // This keeps things DRY
+        const data = {
+            success: true,
+            meta: {
+                oldest: null,
+                newest: null,
+                count: 0,
+                mode: mode ?? 'all'
+            },
+            scores: []
+        };
 
-            cursors = {
-                newer: utils.getScoreCursor({
-                    time_submitted: firstRow.time_submitted,
-                    id: firstRow.id
-                }),
-                older: utils.getScoreCursor({
-                    time_submitted: lastRow.time_submitted,
-                    id: lastRow.id
-                })
-            };
+        // If scores were returned, update data
+        if (scoresRaw.length > 0) {
+            data.scores = scores;
+            data.meta.count = scores.length;
+            data.meta.oldest = scoresRaw[0].time_saved;
+            data.meta.newest = scoresRaw[scoresRaw.length - 1].time_saved;
         }
 
         // Respond
-        res.json({
-            success: true,
-            meta: {
-                count: scores.length,
-                cursors: cursors
-            },
-            scores
-        });
-
+        res.json(data);
     } catch (err) {
         utils.logError('Error handling API request', err);
-        res.status(500).json({ success: false, message: "Internal server error." });
+        res.status(500).json({ success: false, message: 'Internal server error.' });
     }
 });
 
 router.use((req, res) => {
-    res.status(404).json({ success: false, message: "Invalid endpoint." });
+    res.status(404).json({ success: false, message: 'Invalid endpoint.' });
 });
 
 module.exports = router;
