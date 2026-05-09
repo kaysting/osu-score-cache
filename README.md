@@ -25,7 +25,11 @@ oSC is accessible as a real-time WebSocket or a traditional JSON API.
 
 The WebSocket using [Socket.io](https://socket.io/), which supports all major languages.
 
-#### Socket.io Rooms
+#### Socket.io setup
+
+The Socket.io server is exposed under `https://osc.kaysting.dev/ws`. You may need to specify the path (`/ws`) separately from the base URL (`https://osc.kaysting.dev`).
+
+#### Socket.io rooms
 
 oSC only exposes a blanket scores event through the websocket, which broadcasts all new scores. If you need to filter recent scores by user/mode/map, use the JSON API documented below.
 
