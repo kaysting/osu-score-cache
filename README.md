@@ -2,9 +2,9 @@
 
 # osu! score cache
 
-A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers across all game modes and map statuses. oSC also caches several days of scores, so you're able to move backwards and forwards in time using the API.
+A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers. oSC also caches several days of scores, so you're able to get a lot more recent data than you can from the osu! API.
 
-This project was created for use with [osu!complete](https://osucomplete.org), but there are bound to be other applications with similar needs.
+This project was created primarily for use with [osu!complete](https://osucomplete.org), but other devs might find it useful.
 
 ## Why would I use this over the osu! API?
 
@@ -14,6 +14,8 @@ This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/
 - Allowing you to move forward/backward in the history of recent passing scores without caching arbitrary query strings
 - Allowing you to fetch recent scores in all modes with a single request
 - Reducing load on osu!'s infrastructure from developers who would otherwise poll the osu! API
+
+This project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to collect new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
 
 ## How do I use it?
 
