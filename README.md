@@ -7,6 +7,8 @@ A JSON API and real-time WebSocket providing access to osu!'s recently submitted
 
 This project was created primarily for use with [osu!complete](https://osucomplete.org), but other devs might find it useful.
 
+Please use this service for good, not evil. Do not attempt to circumvent rate limits or abuse the service in any other way. Please [reach out to Kayla](mailto:kayla@kaysting.dev) with any questions or concerns. Bad actors will be IP-banned.
+
 ## Why would I use this over the osu! API?
 
 This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/#get-scores102) API endpoint by:
@@ -199,7 +201,7 @@ While discouraged, you can self-host an instance of osu-score-cache by following
 1. Ensure you have a recent version of Node.js installed
 2. Clone the repo and open it in your Terminal
 3. Run `npm install`
-4. Configure environment variables by creating `.env` or otherwise:
+4. Configure environment variables by creating `.env` or directly in your environment:
     - Set `OSU_CLIENT_ID` to an osu! application client ID
     - Set `OSU_CLIENT_SECRET` to an osu! application client secret
     - Set `PORT` to your desired webserver port or leave it blank to use `8080`
@@ -214,3 +216,7 @@ oSC uses a highly optimized SQLite database to store millions of scores in a sma
 osu! receives roughly 1 million passing score submissions per day, meaning that with oSC's default configuration of 30 days, the database will hold around 30 million scores. Keep this in mind when increasing the cache length on your own instance.
 
 The production instance of osu-score-cache is hosted on a Canada-based cloud server provided by OVHCloud.
+
+## Data persistence
+
+oSC makes no promise of data retention. This project is inherently only intended to be a data cache, not permanent storage. A best effort will be made to ensure the database isn't wiped, but there's always a possibility. Account for this possibility while developing.
