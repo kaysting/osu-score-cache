@@ -114,11 +114,13 @@ Returns global stats and configuration for osu-score-cache. [Try it!](https://os
 {
     "success": true,
     "oldest": 1778365140182,
-    "newest": 1778380465392,
-    "count": 198730,
+    "newest": 1778394368632,
+    "count": 291078,
+    "current_cached_days": 0.338,
     "config": {
         "max_list_length": 32,
-        "max_score_request_limit": 1000
+        "max_score_request_limit": 1000,
+        "score_cache_days": 30
     }
 }
 ```
@@ -126,9 +128,11 @@ Returns global stats and configuration for osu-score-cache. [Try it!](https://os
 - integer `total_scores`: The total number of scores currently stored.
 - integer `oldest`: A millisecond-based UNIX timestamp representing the time at which the first score currently stored was saved.
 - integer `newest`: A millisecond-based UNIX timestamp representing the time at which the most recent score was saved.
+- float `current_cached_days`: The number of days of recent scores currently stored.
 - object `config`: Contains settings for this instance of oSC.
     - integer `max_list_length`: The max number of users/maps that can be filtered in a single scores request.
     - integer `max_score_request_limit`: The max number of scores that can be requested (via the limit query param) in a single score request.
+    - integer `score_cache_days`: The number of days of recent scores that are cached.
 
 #### Get scores
 
@@ -190,7 +194,7 @@ The WebSocket currently has no rate limit but one may be added if we run into pe
 - The `scores_{mode}` socket room has been removed.
 - The `/scores` API endpoint has changed:
     - The `before` and `after` params now only accept millisecond-based UNIX timestamps.
-    - The `{mode}` path parameter has been removed and the `mode` query param has been added in its place
+    - The `{mode}` path parameter has been removed and the `mode` query param has been added in its place.
     - The response no longer contains a `meta.cursors` object. Use `meta.newest` or `meta.oldest` for pagination instead.
 - The database has been wiped, making scores cached before this point no longer accessible.
 

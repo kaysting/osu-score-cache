@@ -36,14 +36,17 @@ router.get('/', (req, res) => {
     const newest =
         db.prepare(`SELECT time_saved FROM scores ORDER BY time_saved DESC LIMIT 1`).get()?.time_saved ?? Date.now();
     const count = db.prepare(`SELECT COUNT(*) AS count FROM scores`).get()?.count ?? 0;
+    const cacheLengthMs = newest - oldest;
     res.json({
         success: true,
         oldest,
         newest,
         count,
+        current_cached_days: parseFloat((cacheLengthMs / 1000 / 60 / 60 / 24).toFixed(3)),
         config: {
             max_list_length: env.MAX_LIST_LENGTH,
-            max_score_request_limit: env.MAX_SCORE_REQUEST_LIMIT
+            max_score_request_limit: env.MAX_SCORE_REQUEST_LIMIT,
+            score_cache_days: env.SCORE_CACHE_DAYS
         }
     });
 });
