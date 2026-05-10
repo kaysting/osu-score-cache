@@ -125,7 +125,7 @@ Returns global stats and configuration for osu-score-cache. [Try it!](https://os
 }
 ```
 
-- integer `total_scores`: The total number of scores currently stored.
+- integer `count`: The total number of scores currently stored.
 - integer `oldest`: A millisecond-based UNIX timestamp representing the time at which the first score currently stored was saved.
 - integer `newest`: A millisecond-based UNIX timestamp representing the time at which the most recent score was saved.
 - float `current_cached_days`: The number of days of recent scores currently stored.
