@@ -134,7 +134,7 @@ Returns global stats and configuration for osu-score-cache. [Try it!](https://os
 
 Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/api/scores?limit=10&mode=osu)
 
-**Query Parameters:**
+**Query parameters**
 
 - string? `mode`: An osu! game mode (ruleset) to fetch recent scores in. Defaults to all modes.  
    Valid modes:
@@ -148,7 +148,7 @@ Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/ap
 - integer[]? `user`: Return scores set by a specific user/users. Accepts between 1 and 32 comma-separated user IDs.
 - integer[]? `map`: Return scores set on a specific beatmap/maps. Accepts between 1 and 32 comma-separated beatmap IDs.
 
-**Successful Response**
+**Successful response**
 
 ```json
 {
@@ -189,4 +189,5 @@ The WebSocket currently has no rate limit but one may be added if we run into pe
 - The `/scores` API endpoint has changed:
     - The `before` and `after` params now only accept millisecond-based UNIX timestamps.
     - The `{mode}` path parameter has been removed and the `mode` query param has been added in its place
+    - The response no longer contains a `meta.cursors` object. Use `meta.newest` or `meta.oldest` for pagination instead.
 - The database has been wiped, making scores cached before this point no longer accessible.
