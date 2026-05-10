@@ -160,7 +160,7 @@ Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/ap
         "users": [10109518],
         "maps": [769831, 4667299, 4974900, 4900123, 5043509, 5063978]
     },
-    "scores": []
+    "scores": [ ... ]
 }
 ```
 
