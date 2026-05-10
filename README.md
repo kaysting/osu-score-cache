@@ -223,4 +223,4 @@ The production instance of osu-score-cache is hosted on a Canada-based cloud ser
 
 ## Data persistence
 
-oSC makes no promise of data retention. This project is inherently only intended to be a data cache, not permanent storage. A best effort will be made to ensure the database isn't wiped, but there's always a possibility. Account for this while developing.
+oSC makes no promise of data retention. This project is inherently only intended to be a data cache, not permanent storage. A best effort will be made to ensure the database isn't wiped, but there's always a possibility. Account for this while developing (perhaps by checking the `oldest` value returned by the stats endpoint).
