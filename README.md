@@ -191,3 +191,26 @@ The WebSocket currently has no rate limit but one may be added if we run into pe
     - The `{mode}` path parameter has been removed and the `mode` query param has been added in its place
     - The response no longer contains a `meta.cursors` object. Use `meta.newest` or `meta.oldest` for pagination instead.
 - The database has been wiped, making scores cached before this point no longer accessible.
+
+## Self-hosting oSC
+
+While discouraged, you can self-host an instance of osu-score-cache by following these steps:
+
+1. Ensure you have a recent version of Node.js installed
+2. Clone the repo and open it in your Terminal
+3. Run `npm install`
+4. Configure environment variables by creating `.env` or otherwise:
+    - Set `OSU_CLIENT_ID` to an osu! application client ID
+    - Set `OSU_CLIENT_SECRET` to an osu! application client secret
+    - Set `PORT` to your desired webserver port or leave it blank to use `8080`
+    - See `.env.example` for a comprehensive list of env vars
+5. Start the server with `npm start`
+    - Alternatively, start the server in the background by installing PM2 and running `pm2 start`
+
+## Infrastructure
+
+oSC uses a highly optimized SQLite database to store millions of scores in a small footprint, without the need for a full database server. Score data is Brotli-compressed before being stored to further conserve on storage space. Retrieving scores from the database is a sub-100ms operation, even with millions of rows.
+
+osu! receives roughly 1 million passing score submissions per day, meaning that with oSC's default configuration of 30 days, the database will hold around 30 million scores. Keep this in mind when increasing the cache length on your own instance.
+
+The production instance of osu-score-cache is hosted on a Canada-based cloud server provided by OVHCloud.
