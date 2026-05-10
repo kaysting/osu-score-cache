@@ -101,7 +101,7 @@ Unsuccessful requests will be given the appropriate HTTP status code and served 
 
 #### Get stats
 
-`GET` `/`
+`GET /`
 
 Returns global stats for osu-score-cache.
 
@@ -113,7 +113,7 @@ Returns global stats for osu-score-cache.
 
 #### Get Scores
 
-`GET` `/scores`
+`GET /scores`
 
 Returns recently submitted passing scores.
 

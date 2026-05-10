@@ -12,15 +12,19 @@
 
         <link href="https://kaysting.dev/assets/css/base.css" rel="stylesheet" />
         <link href="https://kaysting.dev/assets/css/utils.css" rel="stylesheet" />
-    </head>
 
-    <style>
-        .container {
-            padding: 24px 16px;
-            margin: 0 auto;
-            max-width: 900px;
-        }
-    </style>
+        <style>
+            :root {
+                --c-base-hue: 240;
+                --c-accent-hue: 240;
+            }
+            .container {
+                padding: 24px 16px;
+                margin: 0 auto;
+                max-width: 900px;
+            }
+        </style>
+    </head>
 
     <body>
         <article class="container"><%- content %></article>
