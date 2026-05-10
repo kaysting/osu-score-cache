@@ -27,7 +27,7 @@ oSC is accessible as a real-time WebSocket or a traditional JSON API.
 
 ### Real-time WebSocket
 
-The WebSocket using [Socket.io](https://socket.io/), which supports all major languages.
+The WebSocket uses [Socket.io](https://socket.io/), which supports all major languages.
 
 #### Socket.io setup
 
