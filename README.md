@@ -1,6 +1,7 @@
-[GitHub](https://github.com/kaysting/osu-score-cache) • [Website](https://osc.kaysting.dev/)
-
 # osu! score cache
+
+GitHub: [kaysting/osu-score-cache](https://github.com/kaysting/osu-score-cache)  
+Website: [osc.kaysting.dev](https://osc.kaysting.dev)
 
 A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers. oSC also caches several days of scores, so you're able to get a lot more recent data than you can from the osu! API.
 
@@ -13,7 +14,7 @@ This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/
 - Providing a real-time websocket that broadcasts new scores, allowing clients to receive events passively instead of polling osu! servers.
 - Allowing you to move forward/backward in the history of recent passing scores without caching arbitrary query strings.
 - Allowing you to fetch recent scores in all modes with a single request.
-- Allowing you to filter recent scores for only a single player or list of players
+- Allowing you to filter recent scores for specific players or beatmaps (or both).
 
 This project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to collect new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
 
@@ -50,36 +51,35 @@ The intent is that you use this event as a signal to fetch the data you need fro
 
 #### Set up in JavaScript (web or Node.js)
 
-Install and require the module:
-
-```js
+```javascript
+// Install and require the module
+// On web, use the Socket.io CDN
 const { io } = require('socket.io-client');
-```
 
-Initialize the connection:
-
-```js
+// Initialize client
 const socket = io('https://osc.kaysting.dev', {
-    path: '/ws', // socket is under /ws
+    path: '/ws',
     transports: ['websocket'] // avoid http polling
 });
-```
 
-Connect and subscribe to rooms:
-
-```js
+// Connect to socket
 socket.on('connect', () => {
     console.log(`Connected to osu! score cache!`);
 
-    socket.emit('subscribe', 'scores'); // here we subscribe to the "scores" room
+    // Subscribe to start receiving scores
+    socket.emit('subscribe', 'scores');
 });
-```
 
-Listen for events:
-
-```js
+// Listen for scores
 socket.on('scores', scores => {
-    // Do something with the scores
+    // Do something with the new scores
+    // Score objects don't contain user/map metadata, so you'll have to request
+    // those details from the osu! API afterwards
+    for (const score of scores) {
+        console.log(
+            `User ${score.user_id} just got a ${(score.accuracy * 100).toFixed(2)}% ${score.rank} rank on map ${score.beatmap_id} in mode ${score.ruleset_id}`
+        );
+    }
 });
 ```
 
@@ -103,19 +103,35 @@ Unsuccessful requests will be given the appropriate HTTP status code and served 
 
 `GET /`
 
-Returns global stats for osu-score-cache.
+Returns global stats and configuration for osu-score-cache. [Try it!](https://osc.kaysting.dev/api)
 
 **Successful response**
+
+```json
+{
+    "success": true,
+    "oldest": 1778365140182,
+    "newest": 1778380465392,
+    "count": 198730,
+    "config": {
+        "max_list_length": 32,
+        "max_score_request_limit": 1000
+    }
+}
+```
 
 - integer `total_scores`: The total number of scores currently stored.
 - integer `oldest`: A millisecond-based UNIX timestamp representing the time at which the first score currently stored was saved.
 - integer `newest`: A millisecond-based UNIX timestamp representing the time at which the most recent score was saved.
+- object `config`: Contains settings for this instance of oSC.
+    - integer `max_list_length`: The max number of users/maps that can be filtered in a single scores request.
+    - integer `max_score_request_limit`: The max number of scores that can be requested (via the limit query param) in a single score request.
 
 #### Get Scores
 
 `GET /scores`
 
-Returns recently submitted passing scores.
+Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/api/scores?limit=10&mode=osu)
 
 **Query Parameters:**
 
@@ -132,6 +148,21 @@ Returns recently submitted passing scores.
 - integer[]? `map`: Return scores set on a specific beatmap/maps. Accepts between 1 and 32 comma-separated beatmap IDs.
 
 **Successful Response**
+
+```json
+{
+    "success": true,
+    "meta": {
+        "oldest": 1778379338446,
+        "newest": 1778381392278,
+        "count": 12,
+        "mode": "all",
+        "users": [10109518],
+        "maps": [769831, 4667299, 4974900, 4900123, 5043509, 5063978]
+    },
+    "scores": []
+}
+```
 
 - boolean `success`: `true`, indicating the request was successful.
 - object `meta`: Information about the request.

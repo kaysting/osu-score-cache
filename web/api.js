@@ -30,17 +30,31 @@ const modeMap = {
     mania: 'mania'
 };
 
+router.get('/', (req, res) => {
+    const oldest =
+        db.prepare(`SELECT time_saved FROM scores ORDER BY time_saved ASC LIMIT 1`).get()?.time_saved ?? Date.now();
+    const newest =
+        db.prepare(`SELECT time_saved FROM scores ORDER BY time_saved DESC LIMIT 1`).get()?.time_saved ?? Date.now();
+    const count = db.prepare(`SELECT COUNT(*) AS count FROM scores`).get()?.count ?? 0;
+    res.json({
+        success: true,
+        oldest,
+        newest,
+        count,
+        config: {
+            max_list_length: env.MAX_LIST_LENGTH,
+            max_score_request_limit: env.MAX_SCORE_REQUEST_LIMIT
+        }
+    });
+});
+
 router.get('/scores', (req, res) => {
     try {
-        // Define constants
-        const MAX_LIST_LENGTH = 32;
-        const MAX_SCORE_COUNT = 1000;
-
         // Get params
         // Note: We use OR (||) instead of nullish (??) for numbers
         // because NaN isn't null or undefined
         const mode = modeMap[(req.query.mode || '').toLowerCase()] || null;
-        const limit = utils.clamp(parseInt(req.query.limit) || 100, 1, MAX_SCORE_COUNT);
+        const limit = utils.clamp(parseInt(req.query.limit) || 100, 1, env.MAX_SCORE_REQUEST_LIMIT);
         const before = parseInt(req.query.before) || null;
         const after = parseInt(req.query.after) || null;
         const userIds = (req.query.user ?? '')
@@ -61,7 +75,7 @@ router.get('/scores', (req, res) => {
             }
         ];
         for (const entry of lists) {
-            if (entry.list.length > MAX_LIST_LENGTH) {
+            if (entry.list.length > env.MAX_LIST_LENGTH) {
                 return res.status(400).json({
                     success: false,
                     message: `List ${entry.name} may contain up to 32 entries, but ${entry.list.length} where provided.`
@@ -160,6 +174,16 @@ router.get('/scores', (req, res) => {
                     data.meta.maps.push(mapId);
                 }
             }
+        } else {
+            // Get first and last score for dates
+            const oldest =
+                db.prepare(`SELECT time_saved FROM scores ORDER BY time_saved ASC LIMIT 1`).get()?.time_saved ??
+                Date.now();
+            const newest =
+                db.prepare(`SELECT time_saved FROM scores ORDER BY time_saved DESC LIMIT 1`).get()?.time_saved ??
+                Date.now();
+            data.meta.oldest = oldest;
+            data.meta.newest = newest;
         }
 
         // Respond

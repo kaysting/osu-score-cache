@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new socketIo.Server(server, {
     cors: {
-        origin: '*',
+        origin: '*'
     },
     path: '/ws'
 });
@@ -28,6 +28,9 @@ app.set('trust proxy', 1);
 
 // Expose API
 app.use('/api', require('./api'));
+
+// Expose assets
+app.use(express.static('public'));
 
 // Serve homepage with documentation
 app.get('/', (req, res) => {
@@ -45,15 +48,19 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res, next) => {
-    res.status(404).end();
+    res.status(404).render('page', {
+        content: `
+            <h1 class="text-center">404 Not Found</h1>
+            <p class="text-center"><a href="/">Go home</a></p>
+        `,
+        title: '404'
+    });
 });
 
 // Set up socket.io
-io.on('connection', (socket) => {
-    socket.on('subscribe', (room) => {
-        const validRooms = [
-            'scores', 'scores_osu', 'scores_taiko', 'scores_fruits', 'scores_mania', 'updates'
-        ];
+io.on('connection', socket => {
+    socket.on('subscribe', room => {
+        const validRooms = ['scores', 'scores_osu', 'scores_taiko', 'scores_fruits', 'scores_mania', 'updates'];
         if (!validRooms.includes(room)) return;
         socket.join(room);
         utils.log(`Socket ${socket.id} joined room ${room}`);
@@ -82,7 +89,7 @@ function gracefulExit(code = 0) {
     process.exit(code);
 }
 
-process.on('exit', (code) => {
+process.on('exit', code => {
     utils.log(`Process exiting with code ${code}`);
     gracefulExit(code);
 });
@@ -97,12 +104,12 @@ process.on('SIGTERM', () => {
     gracefulExit(0);
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
     utils.logError('Uncaught exception:', err);
     gracefulExit(1);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', reason => {
     utils.logError('Unhandled rejection:', reason);
     gracefulExit(1);
 });

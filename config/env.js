@@ -12,6 +12,9 @@ env.DB_PATH = process.env.DB_PATH || path.join(env.ROOT, 'database/storage.db');
 
 env.SCORE_CACHE_DAYS = parseInt(process.env.SCORE_CACHE_DAYS) || 30;
 
+env.MAX_LIST_LENGTH = parseInt(process.env.MAX_LIST_LENGTH) || 32;
+env.MAX_SCORE_REQUEST_LIMIT = parseInt(process.env.MAX_SCORE_REQUEST_LIMIT) || 1000;
+
 env.PORT = parseInt(process.env.PORT) || 8080;
 
 module.exports = env;
