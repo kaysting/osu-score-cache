@@ -201,4 +201,12 @@ router.use((req, res) => {
     res.status(404).json({ success: false, message: 'Invalid endpoint.' });
 });
 
+router.use((err, req, res, next) => {
+    console.error(err);
+    res.status(404).json({
+        success: false,
+        message: 'Internal server error. Try again later or report the issue to kayla@kaysting.dev'
+    });
+});
+
 module.exports = router;

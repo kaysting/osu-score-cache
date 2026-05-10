@@ -50,7 +50,18 @@ app.get('/', (req, res) => {
 app.use((req, res, next) => {
     res.status(404).render('page', {
         content: `
-            <h1 class="text-center">404 Not Found</h1>
+            <h1 class="text-center text-secondary text-light">404 Not Found</h1>
+            <p class="text-center"><a href="/">Go home</a></p>
+        `,
+        title: '404'
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(404).render('page', {
+        content: `
+            <h1 class="text-center text-secondary text-light">500 Internal Server Error</h1>
             <p class="text-center"><a href="/">Go home</a></p>
         `,
         title: '404'
