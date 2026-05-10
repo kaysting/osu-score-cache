@@ -12,6 +12,7 @@ const db = new Database(env.DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('busy_timeout = 15000');
 db.pragma('synchronous = NORMAL');
+db.pragma('auto_vacuum = INCREMENTAL');
 
 // Initialize with schema if needed
 const schemaFile = path.join(env.ROOT, 'database/schema.sql');
