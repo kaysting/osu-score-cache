@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
         title: 'osu! score cache',
         meta: {
             title: 'osu! score cache',
-            description: `A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers.`
+            description: `A JSON API and real-time WebSocket providing access to osu!'s recently submitted passing scores. oSC stores days of score history, letting your app sync back up after downtime with no hiccups.`
         }
     });
 });

@@ -3,7 +3,7 @@
 GitHub: [kaysting/osu-score-cache](https://github.com/kaysting/osu-score-cache)  
 Website: [osc.kaysting.dev](https://osc.kaysting.dev)
 
-A JSON API and real-time WebSocket that provides access to recent passing scores submitted to the osu! servers. oSC also caches several days of scores, so you're able to get a lot more recent data than you can from the osu! API.
+A JSON API and real-time WebSocket providing access to osu!'s recently submitted passing scores. oSC stores days of score history, letting your app sync back up after downtime with no hiccups.
 
 This project was created primarily for use with [osu!complete](https://osucomplete.org), but other devs might find it useful.
 
