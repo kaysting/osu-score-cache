@@ -17,7 +17,7 @@ This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/
 - Allowing you to fetch recent scores in all modes or a specific mode with a single request.
 - Allowing you to filter recent scores for specific players or beatmaps (or both).
 
-Unfortunately, this project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to save and broadcast new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
+While oSC does poll the osu! API's Get Scores endpoint every 5 seconds to save and broadcast new scores, it aims to prevent other devs from doing the same, thus lightening the load on osu!'s own infrastructure.
 
 ## How do I use it?
 
