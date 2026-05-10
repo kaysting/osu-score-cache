@@ -15,6 +15,7 @@ This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/
 - Allowing you to move forward/backward in the history of recent passing scores without caching arbitrary query strings.
 - Allowing you to fetch recent scores in all modes with a single request.
 - Allowing you to filter recent scores for specific players or beatmaps (or both).
+- Providing a longer history (30 days) as opposed to only a couple days.
 
 This project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to collect new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
 
