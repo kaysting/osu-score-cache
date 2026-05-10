@@ -95,7 +95,7 @@ All API endpoints are exposed under the base URL:
 
 If self-hosting, use your hostname but keep the `/api` part.
 
-#### Error Object
+#### Error object
 
 Unsuccessful requests will be given the appropriate HTTP status code and served an error object:
 
@@ -130,7 +130,7 @@ Returns global stats and configuration for osu-score-cache. [Try it!](https://os
     - integer `max_list_length`: The max number of users/maps that can be filtered in a single scores request.
     - integer `max_score_request_limit`: The max number of scores that can be requested (via the limit query param) in a single score request.
 
-#### Get Scores
+#### Get scores
 
 `GET /scores`
 
@@ -177,7 +177,7 @@ Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/ap
     - integer[] `maps`: A list of beatmap IDs that have a score in this batch.
 - array `scores`: A list of [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API.
 
-### Rate Limits
+### Rate limits
 
 The JSON API is strictly limited to 60 requests per minute and will return HTTP status `429` with an error object if exceeded.
 
