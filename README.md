@@ -12,12 +12,12 @@ This project was created primarily for use with [osu!complete](https://osucomple
 This project mirrors and expands on osu!'s [Get Scores](https://osu.ppy.sh/docs/#get-scores102) API endpoint by:
 
 - Providing a real-time websocket that broadcasts new scores, allowing clients to receive events passively instead of polling osu! servers.
-- Allowing you to move forward/backward in the history of recent passing scores without caching opaque query strings.
-- Allowing you to fetch recent scores in all modes with a single request.
+- Exposing a deeper history (up to 30 days) as opposed to only a couple days.
+- Allowing navigation forwards and backwards in recent score history using timestamps instead of opaque query strings.
+- Allowing you to fetch recent scores in all modes or a specific mode with a single request.
 - Allowing you to filter recent scores for specific players or beatmaps (or both).
-- Providing a longer history (30 days) as opposed to only a couple days.
 
-This project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to collect new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
+Unfortunately, this project _does_ poll the osu! API's Get Scores endpoint every 5 seconds to save and broadcast new scores, but if it helps other devs avoid doing the same, it should have a net positive effect on osu!'s infrastructure.
 
 ## How do I use it?
 
