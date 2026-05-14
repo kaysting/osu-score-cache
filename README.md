@@ -179,7 +179,9 @@ Returns recently submitted passing scores. [Try it!](https://osc.kaysting.dev/ap
     - string `mode`: The mode of this batch of scores. One of `osu`, `taiko`, `fruits`, `mania`, or `all` if all modes are included.
     - integer[] `users`: A list of user IDs who have a score in this batch.
     - integer[] `maps`: A list of beatmap IDs that have a score in this batch.
-- array `scores`: A list of [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API.
+- array `scores`: A list of [Score](https://osu.ppy.sh/docs/#score) objects from the osu! API in order of oldest to newest.
+
+In responses with no scores (out of range or no filtered matches), `newest` and `oldest` are set to the storage time of the newest and oldest scores currently in the database respectively.
 
 ### Rate limits
 
