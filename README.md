@@ -217,11 +217,11 @@ While discouraged, you can self-host an instance of osu-score-cache by following
 
 ## Infrastructure
 
-oSC uses a highly optimized SQLite database to store millions of scores in a small footprint, without the need for a full database server. Score data is Brotli-compressed before being stored to further conserve on storage space. Retrieving scores from the database is a sub-100ms operation, even with millions of rows.
+oSC uses a highly optimized SQLite database to store millions of scores in a small footprint, without the need for a full database server. Score data is Brotli-compressed before being stored to further conserve on storage space. Retrieving scores from the database is a sub-second operation despite millions of entries.
 
-osu! receives roughly 1 million passing score submissions per day, meaning that with oSC's default configuration of 30 days, the database will hold around 30 million scores. Keep this in mind when increasing the cache length on your own instance.
+osu! receives roughly 1 million passing score submissions daily. After preliminary testing, the database file appears to grow by roughly 20 GB for every 30 days of scores it holds. Keep this in mind when increasing the cache time on your own instance.
 
-The production instance of osu-score-cache is hosted on a Canada-based cloud server provided by OVHCloud.
+The production instance of osu-score-cache is hosted on a Canada-based cloud server provided by OVHCloud, with Cloudflare as a proxy.
 
 ## Data persistence
 
