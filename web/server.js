@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
 // Set up socket.io
 io.on('connection', socket => {
     socket.on('subscribe', room => {
-        const validRooms = ['scores', 'scores_osu', 'scores_taiko', 'scores_fruits', 'scores_mania', 'updates'];
+        const validRooms = ['scores', 'updates'];
         if (!validRooms.includes(room)) return;
         socket.join(room);
         utils.log(`Socket ${socket.id} joined room ${room}`);
