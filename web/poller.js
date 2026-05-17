@@ -87,7 +87,7 @@ module.exports = io => {
                 });
 
                 utils.log(
-                    `Fetched, saved, and broadcasted ${scores.length} scores to ${io.engine.clientCount} clients in ${Date.now() - START_TIME}ms`
+                    `Fetched, saved, and broadcasted ${scores.length} scores to ${io.engine.clientsCount} clients in ${Date.now() - START_TIME}ms`
                 );
             } else {
                 // osu is very active, this should almost never trigger
