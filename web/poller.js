@@ -56,9 +56,6 @@ module.exports = io => {
                 // Broadcast all scores to global scores room
                 io.to('scores').emit('scores', scores);
 
-                // Get the number of scores in the db before saving this batch
-                const countBeforeSaving = getTotalStored();
-
                 // Save scores to db, including the raw score JSON compressed
                 let now = Date.now();
                 const insertScore = db.prepare(
@@ -83,11 +80,6 @@ module.exports = io => {
                     }
                 })();
 
-                // Get the updated stored number of scores and use it to concretely
-                // say how many scores we saved
-                const countAfterSaving = getTotalStored();
-                const actualCountSaved = countAfterSaving - countBeforeSaving;
-
                 // Broadcast update notification
                 io.to('updates').emit('update', {
                     count: scores.length,
@@ -95,7 +87,7 @@ module.exports = io => {
                 });
 
                 utils.log(
-                    `Fetched and broadcasted ${scores.length} and saved ${actualCountSaved} scores in ${Date.now() - START_TIME}ms`
+                    `Fetched, saved, and broadcasted ${scores.length} scores to ${io.engine.clientCount} clients in ${Date.now() - START_TIME}ms`
                 );
             } else {
                 // osu is very active, this should almost never trigger
