@@ -233,6 +233,10 @@ Feel free to make small changes and submit pull requests, but if you'd like to m
 
 Suspected vibe-coded contributions will be rejected without question. If you use AI to assist with writing code, please thoroughly review its output.
 
+## Donations
+
+If you'd like to help pay for server costs and development, feel free to donate on [Kayla's Ko-fi](https://ko-fi.com/kaysting)!
+
 ## AI disclosure
 
 This codebase is 99.5% human-written and 100% human reviewed.
