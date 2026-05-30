@@ -221,7 +221,7 @@ oSC uses a highly optimized SQLite database to store millions of scores in a sma
 
 osu! receives roughly 1 million passing score submissions daily. After preliminary testing, the database file appears to grow by roughly 20 GB for every 30 days of scores it holds. Keep this in mind when increasing the cache time on your own instance.
 
-The production instance of osu-score-cache is hosted on a Canada-based cloud server provided by OVHCloud, with Cloudflare as a proxy.
+The production instance of osu-score-cache is hosted on a cheap, Europe-based Contabo VPS, with Cloudflare as a proxy. This server will be upgraded as traffic demands, but it's its own island, isolated from my other projects.
 
 ## Data persistence
 
