@@ -123,7 +123,7 @@ module.exports = io => {
         }
 
         // Wait and poll again
-        const minTime = 5000;
+        const minTime = env.POLL_INTERVAL_SECS;
         const elapsed = Date.now() - START_TIME;
         const timeLeft = Math.max(0, minTime - elapsed);
         setTimeout(poll, timeLeft);

@@ -11,6 +11,7 @@ env.OSU_CLIENT_SECRET = process.env.OSU_CLIENT_SECRET || '';
 env.DB_PATH = process.env.DB_PATH || path.join(env.ROOT, 'database/storage.db');
 
 env.SCORE_CACHE_DAYS = parseInt(process.env.SCORE_CACHE_DAYS) || 30;
+env.POLL_INTERVAL_SECS = parseInt(process.env.POLL_INTERVAL_SECS) || 10;
 
 env.MAX_LIST_LENGTH = parseInt(process.env.MAX_LIST_LENGTH) || 32;
 env.MAX_SCORE_REQUEST_LIMIT = parseInt(process.env.MAX_SCORE_REQUEST_LIMIT) || 1000;
