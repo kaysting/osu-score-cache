@@ -191,6 +191,10 @@ The WebSocket currently has no rate limit but one may be added if we run into pe
 
 ## Breaking changes
 
+### 2026-06-06
+- The database has been wiped due to extended downtime resulting from osu!'s recent DDoS attack.
+    - The cursor string wr had saved for the osu! API's get scores endpoint expired, leaving a gap of missing scores in the cache. Gaps are not tolerated and require a total wipe to ensure the cache is seamless. 
+
 ### 2026-05-09
 
 - The `scores_{mode}` socket room has been removed.
