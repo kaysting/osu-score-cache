@@ -46,7 +46,7 @@ const pokeOsuApi = async () => {
             );
         }
     }
-    setTimeout(pokeOsuApi, 1000 * 60);
+    setTimeout(pokeOsuApi, 1000 * 60 * 5);
     return isOsuOnline;
 };
 
@@ -54,8 +54,8 @@ module.exports = async io => {
     const poll = async () => {
         // Don't poll if we can't access osu API
         if (!isOsuOnline) {
-            utils.log(`osu! API is offline, skipping poll`);
-            return setTimeout(poll, 5000);
+            utils.log(`osu! API is inaccessible, skipping poll`);
+            return setTimeout(poll, 1000 * 60);
         }
 
         const START_TIME = Date.now();
