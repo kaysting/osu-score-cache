@@ -14,8 +14,39 @@ const getTotalStored = () => db.prepare(`SELECT COUNT(*) AS count FROM scores`).
 
 let lastCleanup = 0;
 
-module.exports = io => {
+const axios = require('axios');
+let isOsuOnline = null;
+const checkOsuAccessibility = async () => {
+    const oldStatus = isOsuOnline;
+    let statusCode = null;
+    try {
+        await axios.get('https://osu.ppy.sh/api/v2/auth/token');
+        isOsuOnline = true;
+    } catch (error) {
+        statusCode = error.response?.status;
+        isOsuOnline = statusCode === 401;
+    }
+    if (oldStatus !== isOsuOnline) {
+        if (isOsuOnline) {
+            utils.log(`osu! API is online`);
+        } else {
+            utils.logError(
+                `osu! API is currently inaccessible (error ${statusCode}), updates will be delayed until access is restored`
+            );
+        }
+    }
+    setTimeout(checkOsuAccessibility, 1000 * 60);
+    return isOsuOnline;
+};
+
+module.exports = async io => {
     const poll = async () => {
+        // Don't poll if we can't access osu API
+        if (!isOsuOnline) {
+            utils.log(`osu! API is offline, skipping poll`);
+            return setTimeout(poll, 5000);
+        }
+
         const START_TIME = Date.now();
         try {
             const newCursors = {};
@@ -129,5 +160,6 @@ module.exports = io => {
         setTimeout(poll, timeLeft);
     };
 
+    await checkOsuAccessibility();
     poll();
 };
