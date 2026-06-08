@@ -31,7 +31,6 @@ const pokeOsuApi = async () => {
         });
         isOsuOnline = true;
     } catch (error) {
-        console.log(error.response);
         statusCode = error.response?.status;
         isOsuOnline = statusCode === 401;
     }
