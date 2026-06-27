@@ -162,6 +162,11 @@ module.exports = async io => {
             }
         } catch (error) {
             utils.logError('Error during polling:', error);
+            if (error.status === 422) {
+                // Cursor expired, wipe scores and reset cursor
+                db.prepare(`DELETE FROM scores`);
+                db.prepare(`DELETE FROM cursors`);
+            }
         }
 
         // Wait and poll again
